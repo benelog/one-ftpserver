@@ -1,0 +1,19 @@
+276  [main] INFO  c.n.n.ftpserver.EventLogginFtplet - 
+293  [main] INFO  c.n.n.ftpserver.NeNoteUserManager - authentication request: nt10627
+295  [main] INFO  c.n.n.ftpserver.NeNoteUserManager - authentication request: nt10627
+763  [main] INFO  c.n.nenote.ftpserver.AuthApiClient - Auth API response:"NTALK00|OK|bnQxMDAxMUBoYW5hdG91ci5oYW5hdG91cg%3D%3D|YzhkMWI0NGMtMWFiNS00ZDAyLTgwMjYtNzI3NmQyMDBjNDdjMTMzMzQyMjQxMTg3Mg%3D%3D"
+1047 [main] INFO  c.n.nenote.ftpserver.AuthApiClient - Auth API response:"NTALK11|11||"
+1029 [main] INFO  c.n.nenote.ftpserver.AuthApiClient - Auth API response:"NTALK11|11||"
+1313 [main] INFO  c.n.nenote.ftpserver.AuthApiClient - Auth API response:"NTALK11|11||"
+754  [main] INFO  c.n.nenote.ftpserver.AuthApiClient - Auth API response:"NTALK11|11||"
+1509 [main] INFO  c.n.nenote.ftpserver.AuthApiClient - Auth API response:"NTALK11|11||"
+1294 [main] INFO  c.n.nenote.ftpserver.AuthApiClient - Auth API response:"NTALK11|11||"
+1457 [main] INFO  c.n.nenote.ftpserver.AuthApiClient - Auth API response:"NTALK11|11||"
+1056 [main] INFO  c.n.nenote.ftpserver.AuthApiClient - Auth API response:"NTALK00|OK|ZGV2MDFAZGV2LmhhbmF0b3Vy|NjVjY2Q2NTEtNjE1Yy00ZjI5LThkYTItYWViOTQ4MThhYjJhMTMzMzQyMzAzMDgxNg%3D%3D"
+1213 [main] INFO  c.n.nenote.ftpserver.AuthApiClient - Auth API response:"NTALK11|11||"
+891  [main] INFO  c.n.nenote.ftpserver.AuthApiClient - Auth API response:"NTALK11|11||"
+973  [main] INFO  c.n.nenote.ftpserver.AuthApiClient - Auth API response:"NTALK11|11||"
+1259 [main] INFO  c.n.nenote.ftpserver.AuthApiClient - Auth API response:"NTALK00|OK|bnQxMDAxMUBoYW5hdG91ci5oYW5hdG91cg%3D%3D|MjY4NzhmMjctZDAzZS00MGQ0LWFjNWUtY2Q0ZjhiODMyYzk3MTMzMzQyMzEwNzU1Mw%3D%3D"
+993  [main] INFO  c.n.nenote.ftpserver.AuthApiClient - Auth API response:"NTALK11|11||"
+1143 [main] INFO  c.n.nenote.ftpserver.AuthApiClient - Auth API response:"NTALK00|OK|bnQxMDAxMUBoYW5hdG91ci5oYW5hdG91cg%3D%3D|ZWEzOGQ0MWQtMTdiZi00ZWUyLWIwZjQtMWU4NTdjNmYyNTZkMTMzMzQyMzEzNjc0Ng%3D%3D"
+1011 [main] INFO  c.n.nenote.ftpserver.AuthApiClient - Auth API response:"NTALK11|11||"

@@ -1,0 +1,7 @@
+/target
+/deploy
+/.project
+/.classpath
+/.settings/*.*
+.springBeans
+ftpkeystore.jks
