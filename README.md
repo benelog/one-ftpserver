@@ -1,6 +1,8 @@
 Using One-FTPServer
 =========
 # Features
+
+[![Join the chat at https://gitter.im/benelog/one-ftpserver](https://badges.gitter.im/Join%20Chat.svg)](https://gitter.im/benelog/one-ftpserver?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
 - Provides a simple way to run [Apache FTP sever](http://mina.apache.org/ftpserver/).
 	- No installation. Packaged in one executable jar file.
 	- No configuration file. All configuration is supported by command line arguments.
