@@ -12,7 +12,7 @@ Using One-FTPServer
 # Download
 You can download an executable jar file from <http://benelog.net/one-ftpserver.jar.>
 
-	wget benelog.net/one-ftpserver.jar
+	wget https://github.com/benelog/one-ftpserver/releases/download/0.1/one-ftpserver.jar
     
 # Execute
 If you execute a jar file with no argument, it will be running with default configuration.
