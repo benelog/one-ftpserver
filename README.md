@@ -10,7 +10,7 @@ Using One-FTPServer
 - Supports FTP and FTPS(FTP over SSL(Secure Sockets Layer))
 
 # Download
-You can download an executable jar file from <http://benelog.net/one-ftpserver.jar.>
+You can download an executable jar file from <https://github.com/benelog/one-ftpserver/releases/download/0.1/one-ftpserver.jar>
 
 	wget https://github.com/benelog/one-ftpserver/releases/download/0.1/one-ftpserver.jar
     
