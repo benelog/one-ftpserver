@@ -52,12 +52,16 @@ Get the binary for your platform from the
 [latest release](https://github.com/benelog/one-ftpserver/releases/latest):
 
 	curl -LO https://github.com/benelog/one-ftpserver/releases/latest/download/one-ftpserver-linux-amd64
-	chmod +x one-ftpserver-linux-amd64
+	mv one-ftpserver-linux-amd64 one-ftpserver
+	chmod +x one-ftpserver
+
+The asset carries the platform in its name; renaming it to `one-ftpserver` is
+what makes the commands below work as they are written.
 
 Available assets: `one-ftpserver-linux-amd64`, `one-ftpserver-linux-arm64`,
 `one-ftpserver-darwin-amd64`, `one-ftpserver-darwin-arm64`,
 `one-ftpserver-windows-amd64.exe`. To pin a version, replace `latest/download`
-with `download/v1.0.0`.
+with `download/v2.0.0`.
 
 
 Options

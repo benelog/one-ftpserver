@@ -81,8 +81,10 @@ Build one binary per platform, tag, then publish the assets:
     done
 
     git tag -a vX.Y.Z -m "vX.Y.Z" && git push origin vX.Y.Z
-    gh release create vX.Y.Z dist/* --title "vX.Y.Z" --notes-file notes.md
+    gh release create vX.Y.Z dist/* --title "vX.Y.Z" --notes-file RELEASE.md
 
-Add the section of the new version to `CHANGELOG.md` first and use it as the
-release notes. The download instructions in `README.md` point at
-`releases/latest`, so they need no update; only the pinned example does.
+Add the section of the new version to `CHANGELOG.md` first, then write
+`RELEASE.md` for the release page: it holds the notes of the version being
+released only, while `CHANGELOG.md` keeps every version. The download
+instructions in `README.md` point at `releases/latest`, so they need no update;
+only the pinned example does.
