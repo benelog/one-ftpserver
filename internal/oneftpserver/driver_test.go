@@ -1,6 +1,7 @@
 package oneftpserver
 
 import (
+	"crypto/x509"
 	"os"
 	"path/filepath"
 	"strings"
@@ -115,6 +116,27 @@ func TestTLSIsOnlyAvailableWithTheSSLFlag(t *testing.T) {
 	}
 	if len(tlsConfig.Certificates) != 1 {
 		t.Errorf("got %d certificates, want the one generated for this run", len(tlsConfig.Certificates))
+	}
+}
+
+func TestDriverServesTheGivenCertificate(t *testing.T) {
+	certFile, keyFile := writeTestCertificate(t)
+	drv := newTestDriver(t, &Config{ID: AnonymousID, Home: t.TempDir(), Cert: certFile, Key: keyFile})
+
+	tlsConfig, err := drv.GetTLSConfig()
+	if err != nil {
+		t.Fatalf("GetTLSConfig failed: %v", err)
+	}
+	if len(tlsConfig.Certificates) != 1 {
+		t.Fatalf("got %d certificates, want the one that was given", len(tlsConfig.Certificates))
+	}
+
+	leaf, err := x509.ParseCertificate(tlsConfig.Certificates[0].Certificate[0])
+	if err != nil {
+		t.Fatalf("cannot parse the served certificate: %v", err)
+	}
+	if leaf.Subject.CommonName != "test-certificate" {
+		t.Errorf("served certificate is %q, want the given one, not a generated one", leaf.Subject.CommonName)
 	}
 }
 

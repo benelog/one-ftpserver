@@ -18,6 +18,20 @@ import (
 // one running.
 const certificateValidity = 365 * 24 * time.Hour
 
+// loadTLSConfig reads a certificate of your own, such as one issued by Let's
+// Encrypt, as the usual pair of PEM files.
+func loadTLSConfig(certFile, keyFile string) (*tls.Config, error) {
+	certificate, err := tls.LoadX509KeyPair(certFile, keyFile)
+	if err != nil {
+		return nil, fmt.Errorf("cannot load the certificate: %w", err)
+	}
+
+	return &tls.Config{
+		Certificates: []tls.Certificate{certificate},
+		MinVersion:   tls.VersionTLS12,
+	}, nil
+}
+
 // selfSignedTLSConfig builds a certificate in memory, for this run only.
 // Keeping it out of the file system is what lets --ssl stay a single flag:
 // there is no key store to create beforehand and no file left behind.

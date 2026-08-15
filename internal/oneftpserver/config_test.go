@@ -1,9 +1,18 @@
 package oneftpserver
 
 import (
+	"bytes"
+	"crypto/ecdsa"
+	"crypto/elliptic"
+	"crypto/rand"
+	"crypto/x509"
+	"crypto/x509/pkix"
+	"encoding/pem"
+	"math/big"
 	"path/filepath"
 	"strings"
 	"testing"
+	"time"
 
 	ftpserver "github.com/fclairamb/ftpserverlib"
 )
@@ -188,4 +197,94 @@ func TestSSLChangesTheScheme(t *testing.T) {
 	if config.Scheme() != "ftps" {
 		t.Errorf("scheme = %q, want ftps", config.Scheme())
 	}
+}
+
+func TestCertAndKeyMustComeTogether(t *testing.T) {
+	certFile, keyFile := writeTestCertificate(t)
+
+	for _, config := range []*Config{
+		{ID: AnonymousID, Home: t.TempDir(), Cert: certFile},
+		{ID: AnonymousID, Home: t.TempDir(), Key: keyFile},
+	} {
+		if err := config.Prepare(); err == nil {
+			t.Errorf("cert=%q key=%q must be rejected: one half of the pair is missing", config.Cert, config.Key)
+		}
+	}
+}
+
+func TestOwnCertificateTurnsSSLOn(t *testing.T) {
+	certFile, keyFile := writeTestCertificate(t)
+	config := &Config{ID: AnonymousID, Home: t.TempDir(), Cert: certFile, Key: keyFile}
+
+	if err := config.Prepare(); err != nil {
+		t.Fatalf("Prepare failed: %v", err)
+	}
+
+	if !config.SSL {
+		t.Error("giving a certificate should imply --ssl")
+	}
+	if !config.OwnCertificate() {
+		t.Error("a given certificate must be reported as the server's own")
+	}
+}
+
+func TestBadCertificateIsRejectedBeforeTheServerStarts(t *testing.T) {
+	dir := t.TempDir()
+	certFile := filepath.Join(dir, "cert.pem")
+	keyFile := filepath.Join(dir, "key.pem")
+	writeFile(t, certFile, "not a certificate")
+	writeFile(t, keyFile, "not a key")
+
+	config := &Config{ID: AnonymousID, Home: t.TempDir(), Cert: certFile, Key: keyFile}
+
+	if err := config.Prepare(); err == nil {
+		t.Error("a certificate that cannot be loaded must be rejected at startup")
+	}
+}
+
+// writeTestCertificate puts a self-signed certificate and its key into files,
+// the shape a real one would arrive in.
+func writeTestCertificate(t *testing.T) (certFile, keyFile string) {
+	t.Helper()
+
+	key, err := ecdsa.GenerateKey(elliptic.P256(), rand.Reader)
+	if err != nil {
+		t.Fatalf("cannot generate a test key: %v", err)
+	}
+
+	template := x509.Certificate{
+		SerialNumber: big.NewInt(1),
+		Subject:      pkix.Name{CommonName: "test-certificate"},
+		NotBefore:    time.Now().Add(-time.Hour),
+		NotAfter:     time.Now().Add(time.Hour),
+	}
+
+	der, err := x509.CreateCertificate(rand.Reader, &template, &template, &key.PublicKey, key)
+	if err != nil {
+		t.Fatalf("cannot generate a test certificate: %v", err)
+	}
+
+	keyDER, err := x509.MarshalPKCS8PrivateKey(key)
+	if err != nil {
+		t.Fatalf("cannot marshal the test key: %v", err)
+	}
+
+	dir := t.TempDir()
+	certFile = filepath.Join(dir, "cert.pem")
+	keyFile = filepath.Join(dir, "key.pem")
+	writePEM(t, certFile, "CERTIFICATE", der)
+	writePEM(t, keyFile, "PRIVATE KEY", keyDER)
+
+	return certFile, keyFile
+}
+
+func writePEM(t *testing.T, path, blockType string, der []byte) {
+	t.Helper()
+
+	var out bytes.Buffer
+	if err := pem.Encode(&out, &pem.Block{Type: blockType, Bytes: der}); err != nil {
+		t.Fatalf("cannot encode %s: %v", blockType, err)
+	}
+
+	writeFile(t, path, out.String())
 }

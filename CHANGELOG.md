@@ -1,5 +1,12 @@
 # Changelog
 
+## v2.1.0
+
+- `--cert` and `--key` serve FTPS with a certificate of your own, such as one
+  from Let's Encrypt, instead of the one generated for the run. Giving the
+  pair implies `--ssl`, a pair that cannot be loaded is refused at startup,
+  and the printed `curl` commands drop `-k`.
+
 ## v2.0.1
 
 - The error messages sent to a client no longer reveal where on the server the

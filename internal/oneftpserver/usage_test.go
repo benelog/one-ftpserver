@@ -63,6 +63,20 @@ func TestSummaryOfATLSServerSkipsWgetAndVerification(t *testing.T) {
 	}
 }
 
+func TestSummaryOfAnOwnCertificateDropsTheInsecureFlag(t *testing.T) {
+	certFile, keyFile := writeTestCertificate(t)
+	config := prepared(t, &Config{ID: AnonymousID, Home: t.TempDir(), Cert: certFile, Key: keyFile})
+
+	summary := newSummary(config, "192.168.0.10", 2121)
+
+	if !strings.HasPrefix(summary.Address, "ftps://") {
+		t.Errorf("address = %q, want an ftps one: a certificate implies --ssl", summary.Address)
+	}
+	if strings.Contains(summary.Upload, "-k") {
+		t.Errorf("a certificate of your own can be verified, so -k must go: %s", summary.Upload)
+	}
+}
+
 func TestSummaryPointsOutAGeneratedPassword(t *testing.T) {
 	config := prepared(t, &Config{ID: "benelog", Home: t.TempDir()})
 

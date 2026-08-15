@@ -22,6 +22,7 @@ type Summary struct {
 	Home         string   `json:"home"`
 	PassivePorts string   `json:"passivePorts,omitempty"`
 	SSL          bool     `json:"ssl"`
+	Cert         string   `json:"cert,omitempty"`
 	Timeout      string   `json:"timeout,omitempty"`
 	Upload       string   `json:"upload"`
 	Download     string   `json:"download"`
@@ -43,6 +44,7 @@ func newSummary(config *Config, host string, port int) *Summary {
 		Home:         config.Home,
 		PassivePorts: config.PassivePorts,
 		SSL:          config.SSL,
+		Cert:         config.Cert,
 	}
 
 	if config.Timeout > 0 {
@@ -68,9 +70,9 @@ func (s *Summary) fillCommands(config *Config) {
 	}
 
 	insecure := ""
-	if config.SSL {
-		// The certificate is generated for this run and signed by nobody, so a
-		// client has no way to verify it.
+	if config.SSL && !config.OwnCertificate() {
+		// The generated certificate is signed by nobody, so a client has no
+		// way to verify it. A certificate of your own can be verified as is.
 		insecure = " -k"
 	}
 
@@ -94,6 +96,11 @@ func (s *Summary) Print(out io.Writer) error {
 
 	writer.printf("# Settings\n")
 	writer.printf("- ssl : %t\n", s.SSL)
+
+	if s.SSL {
+		writer.printf("- cert : %s\n", orGenerated(s.Cert))
+	}
+
 	writer.printf("- port : %d\n", s.Port)
 	writer.printf("- passivePorts : %s\n", orNone(s.PassivePorts))
 	writer.printf("- id : %s\n", s.ID)
@@ -144,6 +151,14 @@ func (s *Summary) PrintJSON(out io.Writer) error {
 func orNone(value string) string {
 	if value == "" {
 		return "[none]"
+	}
+
+	return value
+}
+
+func orGenerated(value string) string {
+	if value == "" {
+		return "[generated for this run]"
 	}
 
 	return value

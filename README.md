@@ -21,7 +21,8 @@ second one to list their users. One-FTPServer has neither.
   Python, no package manager.
 - **No key store for FTPS.** `--ssl` is the only thing to do. The certificate is
   generated in memory when the server starts, so there is no `keytool` to run,
-  no `.jks` or `.pem` to create, and no key file left behind.
+  no `.jks` or `.pem` to create, and no key file left behind. A certificate of
+  your own goes in as `--cert` and `--key`.
 - **No user database.** The single user is `--id` and `--password`. Give an
   `--id` without a password and one is generated for that run and printed.
 - **No leftovers.** The server writes nothing but the files clients upload.
@@ -61,7 +62,7 @@ what makes the commands below work as they are written.
 Available assets: `one-ftpserver-linux-amd64`, `one-ftpserver-linux-arm64`,
 `one-ftpserver-darwin-amd64`, `one-ftpserver-darwin-arm64`,
 `one-ftpserver-windows-amd64.exe`. To pin a version, replace `latest/download`
-with `download/v2.0.0`.
+with `download/v2.1.0`.
 
 
 Options
@@ -77,6 +78,8 @@ Options
 | `--password` | | Password of that user. Generated when `--id` is given without one. |
 | `--passivePorts` | | Ports for passive transfers, as `10125-10199`. The OS picks when unset. |
 | `--ssl` | `false` | Serve over TLS with a certificate generated for this run. |
+| `--cert` | | Certificate of your own as a PEM file. Implies `--ssl`. |
+| `--key` | | Private key of that certificate, as a PEM file. |
 | `--timeout` | `0` | Stop by itself after this long, such as `30m`. `0` keeps it running. |
 | `--publicHost` | | Address to show clients. Detected when unset. |
 | `--json` | `false` | Print the settings as JSON instead of text. |
@@ -87,15 +90,44 @@ FTPS
 
 	one-ftpserver --ssl
 
-The certificate is generated at startup and signed by nobody, so clients have
-nothing to verify it against; that is why the printed `curl` commands carry
-`-k`. The mode is implicit FTPS, which is what an `ftps://` URL means:
+The mode is implicit FTPS, which is what an `ftps://` URL means. The
+certificate is generated at startup, in memory: it lasts a year, covers
+`localhost` and the addresses of the machine, and is replaced by a new one on
+every start. It is signed by nobody, so clients have nothing to verify it
+against; that is why the printed `curl` commands carry `-k`, and why FileZilla
+or WinSCP ask once whether to trust it:
 
 	curl -O ftps://192.168.0.10:2121/report.pdf -k
 
-Use a certificate from a real authority if the server is to be reached by
-someone who has to trust it. This one is meant for a transfer over a network
-you do not control, between two people who already know each other.
+The generated certificate encrypts the transfer, but it cannot prove who the
+server is. That suits a transfer over a network you do not control, between
+two people who already know each other. For a server that strangers have to
+trust, bring a certificate of your own, as the usual pair of PEM files.
+Giving the pair implies `--ssl`, and the printed commands drop `-k`:
+
+	one-ftpserver --cert=fullchain.pem --key=privkey.pem
+
+The easiest authority to get one from is [Let's Encrypt](https://letsencrypt.org/):
+free, automated, and trusted by clients out of the box. On a machine that a
+domain points to, with port 80 reachable for the issuance:
+
+	sudo certbot certonly --standalone -d ftp.example.com
+
+	one-ftpserver --cert=/etc/letsencrypt/live/ftp.example.com/fullchain.pem \
+	              --key=/etc/letsencrypt/live/ftp.example.com/privkey.pem
+
+Three things to know when serving a certificate of your own:
+
+- Clients verify the name they connect with against it, so hand them the
+  domain it was issued for, not the IP address.
+- The files under `/etc/letsencrypt` are readable by root only; run the server
+  as root, or copy the pair somewhere it may read.
+- The files are read once, at startup. A Let's Encrypt certificate lasts 90
+  days and `certbot` renews the files on its own, so restart the server after
+  a renewal.
+
+A certificate from any other authority works the same, as long as it comes as
+PEM: the certificate with its chain in one file, the private key in another.
 
 
 Stopping by itself

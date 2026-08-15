@@ -43,7 +43,12 @@ func newDriver(config *Config) (*driver, error) {
 		// is, which is how this server was used before it moved to Go.
 		settings.TLSRequired = ftpserver.ImplicitEncryption
 
-		drv.tlsConfig, err = selfSignedTLSConfig()
+		if config.OwnCertificate() {
+			drv.tlsConfig, err = loadTLSConfig(config.Cert, config.Key)
+		} else {
+			drv.tlsConfig, err = selfSignedTLSConfig()
+		}
+
 		if err != nil {
 			return nil, err
 		}

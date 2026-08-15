@@ -5,6 +5,7 @@ package oneftpserver
 
 import (
 	"crypto/rand"
+	"crypto/tls"
 	"errors"
 	"fmt"
 	"os"
@@ -32,6 +33,8 @@ type Config struct {
 	Password     string
 	Home         string
 	SSL          bool
+	Cert         string
+	Key          string
 	Timeout      time.Duration
 	PublicHost   string
 	JSON         bool
@@ -45,6 +48,12 @@ type Config struct {
 // case as long as no --id was given.
 func (c *Config) Anonymous() bool {
 	return c.ID == AnonymousID
+}
+
+// OwnCertificate reports whether the server was handed a certificate, instead
+// of generating one for the run.
+func (c *Config) OwnCertificate() bool {
+	return c.Cert != ""
 }
 
 // Scheme is the URL scheme clients have to use.
@@ -76,7 +85,32 @@ func (c *Config) Prepare() error {
 		return err
 	}
 
+	if err := c.resolveTLS(); err != nil {
+		return err
+	}
+
 	return c.resolvePassword()
+}
+
+// resolveTLS checks the certificate pair before the server starts. Giving one
+// turns --ssl on by itself: nobody hands over a certificate to then serve
+// plain FTP.
+func (c *Config) resolveTLS() error {
+	if (c.Cert == "") != (c.Key == "") {
+		return errors.New("cert and key must be given together")
+	}
+
+	if !c.OwnCertificate() {
+		return nil
+	}
+
+	if _, err := tls.LoadX509KeyPair(c.Cert, c.Key); err != nil {
+		return fmt.Errorf("cannot load the certificate: %w", err)
+	}
+
+	c.SSL = true
+
+	return nil
 }
 
 // resolveHome turns the home directory into an absolute path and makes sure it
