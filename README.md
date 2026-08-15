@@ -191,3 +191,4 @@ for them: each one reports the port it was given.
 
 Changes of each version are listed in [CHANGELOG.md](CHANGELOG.md).
 To build or modify the server, see [DEVELOPMENT.md](DEVELOPMENT.md).
+One FTP Server is released under the MIT License; see [LICENSE](LICENSE).
