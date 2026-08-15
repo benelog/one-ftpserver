@@ -18,5 +18,7 @@ from Let's Encrypt and what to know when serving one.
     chmod +x one-ftpserver
 
 Assets: `one-ftpserver-linux-amd64`, `one-ftpserver-linux-arm64`,
-`one-ftpserver-darwin-amd64`, `one-ftpserver-darwin-arm64`,
-`one-ftpserver-windows-amd64.exe`.
+`one-ftpserver-windows-amd64.exe`, `one-ftpserver-windows-arm64.exe` — Windows
+on arm64 is published starting with this release. On macOS, build the binary
+yourself with `go build`, as the Download section of [README.md](README.md)
+explains; an unsigned download would be blocked by Gatekeeper.

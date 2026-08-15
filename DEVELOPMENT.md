@@ -70,10 +70,12 @@ runs implicit FTPS: the connection is encrypted from its first byte, with no
 Releasing
 ---------
 
-Build one binary per platform, tag, then publish the assets:
+Build one binary per platform, tag, then publish the assets. macOS is left
+out on purpose: an unsigned download is blocked by Gatekeeper, so macOS users
+build the binary themselves, as the README explains.
 
     rm -rf dist && mkdir -p dist
-    for target in linux/amd64 linux/arm64 darwin/amd64 darwin/arm64 windows/amd64; do
+    for target in linux/amd64 linux/arm64 windows/amd64 windows/arm64; do
       GOOS=${target%/*}; GOARCH=${target#*/}
       out=dist/one-ftpserver-$GOOS-$GOARCH
       [ "$GOOS" = windows ] && out=$out.exe

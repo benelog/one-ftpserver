@@ -19,8 +19,8 @@ second one to list their users. One FTP Server has neither:
 - **No configuration file.** Every setting is a flag. What you typed is the
   whole state of the server, so `--help` is the entire reference.
 - **No installation.** One binary with no runtime to install first: no JVM, no
-  Python, no package manager. Runs on Linux and macOS (amd64 and arm64) and
-  on Windows (amd64).
+  Python, no package manager. Runs on Linux, macOS and Windows, on amd64 and
+  arm64 each.
 - **No key store for FTPS.** `--ssl` is the only thing to do. The certificate is
   generated in memory when the server starts, so there is no `keytool` to run,
   no `.jks` or `.pem` to create, and no key file left behind. A certificate of
@@ -65,9 +65,16 @@ The asset carries the platform in its name; renaming it to `one-ftpserver` is
 what makes the commands below work as they are written.
 
 Available assets: `one-ftpserver-linux-amd64`, `one-ftpserver-linux-arm64`,
-`one-ftpserver-darwin-amd64`, `one-ftpserver-darwin-arm64`,
-`one-ftpserver-windows-amd64.exe`. To pin a version, replace `latest/download`
-with `download/v2.1.0`.
+`one-ftpserver-windows-amd64.exe`, `one-ftpserver-windows-arm64.exe`. To pin a
+version, replace `latest/download` with `download/v2.1.0`.
+
+On macOS, build the binary yourself — Go is the only requirement, and a binary
+built on the machine is one Gatekeeper has no reason to block, which an
+unsigned download would be:
+
+	git clone https://github.com/benelog/one-ftpserver.git
+	cd one-ftpserver
+	go build -o one-ftpserver .
 
 ### Options
 
