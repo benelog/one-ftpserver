@@ -6,6 +6,9 @@
   from Let's Encrypt, instead of the one generated for the run. Giving the
   pair implies `--ssl`, a pair that cannot be loaded is refused at startup,
   and the printed `curl` commands drop `-k`.
+- Windows on arm64 is published from this release on. macOS binaries are no
+  longer published: Gatekeeper blocks an unsigned download anyway, so macOS
+  users build the binary themselves, as the README explains.
 
 ## v2.0.1
 
@@ -20,8 +23,8 @@ and nothing to install beside it.
 
 ### Highlights
 
-- **Single binary.** Download it, run it. Published for Linux, macOS and
-  Windows, on amd64 and arm64.
+- **Single binary.** Download it, run it. Published for Linux and Windows; on
+  macOS, one `go build` builds it from source.
 - **FTPS without a key store.** `--ssl` is now all there is to it. The previous
   version shipped a `ftpkeystore.jks` inside the jar and copied it into the
   working directory on every start, with its password written in the source.
