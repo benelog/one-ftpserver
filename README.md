@@ -19,7 +19,8 @@ second one to list their users. One FTP Server has neither:
 - **No configuration file.** Every setting is a flag. What you typed is the
   whole state of the server, so `--help` is the entire reference.
 - **No installation.** One binary with no runtime to install first: no JVM, no
-  Python, no package manager.
+  Python, no package manager. Runs on Linux and macOS (amd64 and arm64) and
+  on Windows (amd64).
 - **No key store for FTPS.** `--ssl` is the only thing to do. The certificate is
   generated in memory when the server starts, so there is no `keytool` to run,
   no `.jks` or `.pem` to create, and no key file left behind. A certificate of
