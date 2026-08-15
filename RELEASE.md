@@ -1,4 +1,4 @@
-One-FTPServer can now serve FTPS with a certificate of your own:
+One FTP Server can now serve FTPS with a certificate of your own:
 
     one-ftpserver --cert=fullchain.pem --key=privkey.pem
 

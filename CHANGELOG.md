@@ -15,7 +15,7 @@
 
 ## v2.0.0
 
-One-FTPServer is rewritten in Go. It is now a single binary: no JVM, no jar,
+One FTP Server is rewritten in Go. It is now a single binary: no JVM, no jar,
 and nothing to install beside it.
 
 ### Highlights

@@ -1,4 +1,4 @@
-Developing One-FTPServer
+Developing One FTP Server
 =========
 Go 1.25 or later is the only requirement to build and test.
 

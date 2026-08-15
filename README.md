@@ -1,19 +1,20 @@
-Using One-FTPServer
+One FTP Server
 =========
-An FTP server that is configured entirely by command line arguments. No
-configuration file is read, and none is written.
+One binary, one command, one user: a complete FTP server with nothing to
+configure.
+
+
+Introduction
+---------
 
 	one-ftpserver
 
 That is a complete, running server: the current directory shared over FTP on
-port 2121, open to anonymous logins.
-
-
-Nothing to configure
----------
+port 2121, open to anonymous logins. One FTP Server is configured entirely by
+command line arguments — no configuration file is read, and none is written.
 
 Most FTP servers ask for a configuration file before they will start, and a
-second one to list their users. One-FTPServer has neither.
+second one to list their users. One FTP Server has neither:
 
 - **No configuration file.** Every setting is a flag. What you typed is the
   whole state of the server, so `--help` is the entire reference.
@@ -47,8 +48,11 @@ commands that match them, credentials already filled in:
 	- download : wget --user=benelog --password=1234 ftp://192.168.0.10:10021/[filename]
 
 
-Download
+Usage
 ---------
+
+### Download
+
 Get the binary for your platform from the
 [latest release](https://github.com/benelog/one-ftpserver/releases/latest):
 
@@ -64,9 +68,7 @@ Available assets: `one-ftpserver-linux-amd64`, `one-ftpserver-linux-arm64`,
 `one-ftpserver-windows-amd64.exe`. To pin a version, replace `latest/download`
 with `download/v2.1.0`.
 
-
-Options
----------
+### Options
 
 	one-ftpserver --port=10021 --id=benelog --password=1234 --home=/srv/files
 
@@ -84,9 +86,7 @@ Options
 | `--publicHost` | | Address to show clients. Detected when unset. |
 | `--json` | `false` | Print the settings as JSON instead of text. |
 
-
-FTPS
----------
+### FTPS
 
 	one-ftpserver --ssl
 
@@ -129,9 +129,8 @@ Three things to know when serving a certificate of your own:
 A certificate from any other authority works the same, as long as it comes as
 PEM: the certificate with its chain in one file, the private key in another.
 
+### Stopping by itself
 
-Stopping by itself
----------
 A server started to move one file rarely needs to outlive it. `--timeout` sets
 how long it stays up, after which it stops on its own:
 
@@ -139,9 +138,8 @@ how long it stays up, after which it stops on its own:
 
 `Ctrl-C` stops it at any time.
 
+### Behind NAT
 
-Behind NAT
----------
 Passive transfers tell the client which address to connect back to, and the one
 the server sees is not always the one the client can reach. Two flags cover
 that case: `--publicHost` for the address to hand out, and `--passivePorts` for
@@ -151,9 +149,8 @@ a range narrow enough to open on a firewall or to publish from a container.
 
 	docker run -p 2121:2121 -p 10125-10199:10125-10199 ...
 
+### Scripting
 
-Scripting
----------
 `--json` replaces the printed summary with a single object holding the same
 information, so the address and the credentials can be picked up without
 parsing text:
