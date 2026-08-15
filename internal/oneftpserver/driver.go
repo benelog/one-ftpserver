@@ -72,7 +72,12 @@ func (d *driver) AuthUser(_ ftpserver.ClientContext, user, pass string) (ftpserv
 		return nil, errAuthFailed
 	}
 
-	return afero.NewBasePathFs(afero.NewOsFs(), d.config.Home), nil
+	// BasePathFs names files by their full path on disk in its errors, and
+	// those errors are repeated to the client, so they go through a wrapper
+	// that puts the path the client used back in.
+	fs := afero.NewBasePathFs(afero.NewOsFs(), d.config.Home)
+
+	return &pathHidingFs{Fs: fs, home: d.config.Home}, nil
 }
 
 // authenticate reports whether these credentials are the ones the server was

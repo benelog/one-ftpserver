@@ -3,6 +3,7 @@ package oneftpserver
 import (
 	"os"
 	"path/filepath"
+	"strings"
 	"testing"
 )
 
@@ -63,6 +64,39 @@ func TestClientIsConfinedToTheHomeDirectory(t *testing.T) {
 	}
 	if _, err := fs.Stat("/../secret.txt"); err == nil {
 		t.Error("a file above the home directory must not be reachable")
+	}
+}
+
+func TestErrorsDoNotRevealTheHomeDirectory(t *testing.T) {
+	home := t.TempDir()
+	drv := newTestDriver(t, &Config{ID: AnonymousID, Home: home})
+
+	fs, err := drv.AuthUser(nil, AnonymousID, "")
+	if err != nil {
+		t.Fatalf("AuthUser failed: %v", err)
+	}
+
+	// Stat of a missing file fails with the path in the error, and so does a
+	// rename, whose error carries two paths.
+	_, statErr := fs.Stat("/missing.txt")
+	if statErr == nil {
+		t.Fatal("Stat of a missing file should fail")
+	}
+	renameErr := fs.Rename("/missing.txt", "/elsewhere.txt")
+	if renameErr == nil {
+		t.Fatal("renaming a missing file should fail")
+	}
+
+	for _, err := range []error{statErr, renameErr} {
+		if strings.Contains(err.Error(), home) {
+			t.Errorf("the error %q tells the client where the home directory lives", err)
+		}
+	}
+	if !strings.Contains(statErr.Error(), "/missing.txt") {
+		t.Errorf("the error %q should name the file by the path the client used", statErr)
+	}
+	if !os.IsNotExist(statErr) {
+		t.Errorf("the cleaned error should still count as not-exist, got %v", statErr)
 	}
 }
 

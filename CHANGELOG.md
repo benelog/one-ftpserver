@@ -1,5 +1,11 @@
 # Changelog
 
+## v2.0.1
+
+- The error messages sent to a client no longer reveal where on the server the
+  home directory lives; a failed operation names the file by the path the
+  client used.
+
 ## v2.0.0
 
 One-FTPServer is rewritten in Go. It is now a single binary: no JVM, no jar,
