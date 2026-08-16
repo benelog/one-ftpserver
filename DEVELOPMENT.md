@@ -35,6 +35,9 @@ Layout
     internal/oneftpserver/config.go         Config, its defaults and its validation
     internal/oneftpserver/server.go         Server and Run, the loop main.go blocks on
     internal/oneftpserver/driver.go         authentication and the file system given to a client
+    internal/oneftpserver/fs.go             file system wrapper that keeps the home path out of errors
+    internal/oneftpserver/log.go            the logger, and the log file that follows the day
+    internal/oneftpserver/logfs.go          file system wrapper that logs what a client does
     internal/oneftpserver/tls.go            certificate generated for the run, local address lookup
     internal/oneftpserver/usage.go          Summary, printed as text or as JSON
 
@@ -42,7 +45,9 @@ Layout
 what this repository adds is the single user `driver`, the certificate, and the
 summary. `driver.AuthUser` returns an `afero.NewBasePathFs` rooted at the home
 directory, which is what keeps a client from reaching anything above it. Keep
-it that way when changing the file system.
+it that way when changing the file system. It comes back wrapped twice, by
+`pathHidingFs` and then by `loggingFs`, so an operation worth logging is added
+to `logfs.go` rather than to the library.
 
 `Config.Prepare` is where a bad combination of flags has to be caught. It runs
 before anything is listening, so an error there costs the user nothing.

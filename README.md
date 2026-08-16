@@ -27,8 +27,8 @@ second one to list their users. One FTP Server has neither:
   your own goes in as `--cert` and `--key`.
 - **No user database.** The single user is `--id` and `--password`. Give an
   `--id` without a password and one is generated for that run and printed.
-- **No leftovers.** Beside the log of what clients did, which `--log=off` turns
-  off, the server writes nothing but the files clients upload.
+- **No leftovers.** Besides the log of what clients did, which `--log=off`
+  turns off, the server writes nothing but the files clients upload.
 
 Once it is listening, it prints the settings it ended up with and the client
 commands that match them, credentials already filled in:
