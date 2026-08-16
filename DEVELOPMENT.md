@@ -1,15 +1,13 @@
-Developing One FTP Server
-=========
+# Developing One FTP Server
 Go 1.25 or later is the only requirement to build and test.
 
-Build
+## Build
 
     make build      # go build -o one-ftpserver .
     make run        # build and serve the current directory on port 2121
 
 
-Quality tools
----------
+## Quality tools
 
 Following https://blog.benelog.net/go-quality-tools :
 
@@ -28,8 +26,7 @@ The enabled linters are declared in `.golangci.yml`.
 The same checks run on every push and pull request through `.github/workflows/ci.yml`.
 
 
-Layout
----------
+## Layout
 
     main.go                                 entry point, every flag is declared here
     internal/oneftpserver/config.go         Config, its defaults and its validation
@@ -50,22 +47,19 @@ It comes back wrapped twice, by `pathHidingFs` and then by `loggingFs`, so an op
 It runs before anything is listening, so an error there costs the user nothing.
 
 
-Dependencies
----------
+## Dependencies
 Two of them: `ftpserverlib` for the protocol and `afero` for the file system it hands to a client.
 Both end up in the binary; there is nothing to install beside it.
 
 
-Tests
----------
+## Tests
 `server_test.go` starts a real server on a port the OS picks and talks to it with the few commands of RFC 959 the tests need, so an upload and a download go over a real socket.
 `--port=0` exists partly for this: several tests can run at once without agreeing on ports.
 
 Testing FTPS goes through the same client over `tls.Dial`, since the server runs implicit FTPS: the connection is encrypted from its first byte, with no `AUTH TLS` to negotiate.
 
 
-Releasing
----------
+## Releasing
 
 Build one binary per platform, tag, then publish the assets.
 macOS is left out on purpose: an unsigned download is blocked by Gatekeeper, so macOS users build the binary themselves, as the README explains.

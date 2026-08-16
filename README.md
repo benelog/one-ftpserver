@@ -1,10 +1,8 @@
-One FTP Server
-=========
+# One FTP Server
 One binary, one command, one user: a complete FTP server with nothing to configure.
 
 
-Introduction
----------
+## Introduction
 
 	one-ftpserver
 
@@ -45,8 +43,7 @@ Once it is listening, it prints the settings it ended up with and the client com
 	- download : wget --user=benelog --password=1234 ftp://192.168.0.10:10021/[filename]
 
 
-Usage
----------
+## Usage
 
 ### Download
 
