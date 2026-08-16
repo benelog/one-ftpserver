@@ -38,6 +38,8 @@ type Config struct {
 	Timeout      time.Duration
 	PublicHost   string
 	JSON         bool
+	Log          string
+	Console      bool
 
 	// GeneratedPassword records that Password was not given on the command
 	// line and had to be generated, which the usage output points out.
@@ -48,6 +50,23 @@ type Config struct {
 // case as long as no --id was given.
 func (c *Config) Anonymous() bool {
 	return c.ID == AnonymousID
+}
+
+// Logging reports whether the activity is written to a file, which it is
+// unless --log=off was given.
+func (c *Config) Logging() bool {
+	return c.Log != ""
+}
+
+// LogFile is the file today's activity is written to, empty when there is none.
+// It carries the date, so it is not the value of --log but the name derived
+// from it.
+func (c *Config) LogFile() string {
+	if !c.Logging() {
+		return ""
+	}
+
+	return dailyPath(c.Log, time.Now())
 }
 
 // OwnCertificate reports whether the server was handed a certificate, instead
@@ -89,7 +108,38 @@ func (c *Config) Prepare() error {
 		return err
 	}
 
+	if err := c.resolveLog(); err != nil {
+		return err
+	}
+
 	return c.resolvePassword()
+}
+
+// resolveLog turns the log file into an absolute path and opens it once, so a
+// directory that does not exist, or one that cannot be written to, is reported
+// before the server starts instead of on the first line it has to log.
+func (c *Config) resolveLog() error {
+	if strings.EqualFold(strings.TrimSpace(c.Log), LogOff) {
+		c.Log = ""
+	}
+
+	if !c.Logging() {
+		return nil
+	}
+
+	path, err := filepath.Abs(c.Log)
+	if err != nil {
+		return fmt.Errorf("cannot resolve log file %q: %w", c.Log, err)
+	}
+
+	c.Log = path
+
+	file, err := openLogFile(c.LogFile())
+	if err != nil {
+		return err
+	}
+
+	return file.Close()
 }
 
 // resolveTLS checks the certificate pair before the server starts. Giving one

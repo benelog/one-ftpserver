@@ -2,17 +2,34 @@ package oneftpserver
 
 import (
 	"crypto/x509"
+	"net"
 	"os"
 	"path/filepath"
 	"strings"
 	"testing"
+
+	ftpserver "github.com/fclairamb/ftpserverlib"
 )
+
+// stubClient stands in for a connected client, and answers the two things the
+// driver asks of one: who it is, and where it comes from. Everything else is
+// left to the embedded interface, which a driver that reached for it would
+// panic on rather than answer wrongly.
+type stubClient struct {
+	ftpserver.ClientContext
+}
+
+func (stubClient) ID() uint32 { return 1 }
+
+func (stubClient) RemoteAddr() net.Addr {
+	return &net.TCPAddr{IP: net.IPv4(10, 0, 0, 1), Port: 51000}
+}
 
 func TestAnonymousLoginTakesAnyPassword(t *testing.T) {
 	drv := newTestDriver(t, &Config{ID: AnonymousID, Home: t.TempDir()})
 
 	for _, user := range []string{AnonymousID, "ftp"} {
-		if _, err := drv.AuthUser(nil, user, "someone@example.com"); err != nil {
+		if _, err := drv.AuthUser(stubClient{}, user, "someone@example.com"); err != nil {
 			t.Errorf("%q should be able to log in anonymously: %v", user, err)
 		}
 	}
@@ -21,7 +38,7 @@ func TestAnonymousLoginTakesAnyPassword(t *testing.T) {
 func TestAnonymousLoginIsRefusedForAnotherUser(t *testing.T) {
 	drv := newTestDriver(t, &Config{ID: AnonymousID, Home: t.TempDir()})
 
-	if _, err := drv.AuthUser(nil, "benelog", ""); err == nil {
+	if _, err := drv.AuthUser(stubClient{}, "benelog", ""); err == nil {
 		t.Error("an anonymous server must only accept the anonymous user")
 	}
 }
@@ -29,16 +46,16 @@ func TestAnonymousLoginIsRefusedForAnotherUser(t *testing.T) {
 func TestNamedUserNeedsTheRightPassword(t *testing.T) {
 	drv := newTestDriver(t, &Config{ID: "benelog", Password: "1234", Home: t.TempDir()})
 
-	if _, err := drv.AuthUser(nil, "benelog", "1234"); err != nil {
+	if _, err := drv.AuthUser(stubClient{}, "benelog", "1234"); err != nil {
 		t.Errorf("the configured credentials should be accepted: %v", err)
 	}
-	if _, err := drv.AuthUser(nil, "benelog", "wrong"); err == nil {
+	if _, err := drv.AuthUser(stubClient{}, "benelog", "wrong"); err == nil {
 		t.Error("a wrong password must be refused")
 	}
-	if _, err := drv.AuthUser(nil, "someone", "1234"); err == nil {
+	if _, err := drv.AuthUser(stubClient{}, "someone", "1234"); err == nil {
 		t.Error("a wrong user must be refused")
 	}
-	if _, err := drv.AuthUser(nil, AnonymousID, ""); err == nil {
+	if _, err := drv.AuthUser(stubClient{}, AnonymousID, ""); err == nil {
 		t.Error("anonymous must be refused once --id is given")
 	}
 }
@@ -55,7 +72,7 @@ func TestClientIsConfinedToTheHomeDirectory(t *testing.T) {
 
 	drv := newTestDriver(t, &Config{ID: AnonymousID, Home: home})
 
-	fs, err := drv.AuthUser(nil, AnonymousID, "")
+	fs, err := drv.AuthUser(stubClient{}, AnonymousID, "")
 	if err != nil {
 		t.Fatalf("AuthUser failed: %v", err)
 	}
@@ -72,7 +89,7 @@ func TestErrorsDoNotRevealTheHomeDirectory(t *testing.T) {
 	home := t.TempDir()
 	drv := newTestDriver(t, &Config{ID: AnonymousID, Home: home})
 
-	fs, err := drv.AuthUser(nil, AnonymousID, "")
+	fs, err := drv.AuthUser(stubClient{}, AnonymousID, "")
 	if err != nil {
 		t.Fatalf("AuthUser failed: %v", err)
 	}
@@ -163,7 +180,7 @@ func newTestDriver(t *testing.T, config *Config) *driver {
 		t.Fatalf("Prepare failed: %v", err)
 	}
 
-	drv, err := newDriver(config)
+	drv, err := newDriver(config, discardLogger())
 	if err != nil {
 		t.Fatalf("newDriver failed: %v", err)
 	}

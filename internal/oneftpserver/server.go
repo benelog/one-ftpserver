@@ -5,6 +5,7 @@ import (
 	"errors"
 	"fmt"
 	"io"
+	"log/slog"
 	"net"
 	"os/signal"
 	"strconv"
@@ -17,16 +18,23 @@ import (
 type Server struct {
 	config *Config
 	ftp    *ftpserver.FtpServer
+	logger *slog.Logger
 }
 
-// New builds a server from a prepared Config. Nothing is listening yet.
-func New(config *Config) (*Server, error) {
-	drv, err := newDriver(config)
+// New builds a server from a prepared Config, writing what its clients do to
+// logger. Nothing is listening yet.
+func New(config *Config, logger *slog.Logger) (*Server, error) {
+	drv, err := newDriver(config, logger)
 	if err != nil {
 		return nil, err
 	}
 
-	return &Server{config: config, ftp: ftpserver.NewFtpServer(drv)}, nil
+	ftp := ftpserver.NewFtpServer(drv)
+	// The library drops its own diagnostics by default; they belong in the same
+	// log as the activity of the clients.
+	ftp.Logger = logger
+
+	return &Server{config: config, ftp: ftp, logger: logger}, nil
 }
 
 // Start binds the port and returns what the server ended up with, which is
@@ -79,7 +87,14 @@ func (s *Server) listeningPort() (int, error) {
 // Run starts a server, prints what it is serving to out, and blocks until it
 // is interrupted or the timeout of the configuration runs out.
 func Run(config *Config, out io.Writer) error {
-	server, err := New(config)
+	logger, logFile, err := newLogger(config)
+	if err != nil {
+		return err
+	}
+
+	defer func() { _ = logFile.Close() }()
+
+	server, err := New(config, logger)
 	if err != nil {
 		return err
 	}
@@ -88,6 +103,9 @@ func Run(config *Config, out io.Writer) error {
 	if err != nil {
 		return err
 	}
+
+	logger.Info("server started", "address", summary.Address, "home", config.Home)
+	defer logger.Info("server stopped")
 
 	printSummary := summary.Print
 	if config.JSON {

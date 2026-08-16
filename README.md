@@ -27,7 +27,8 @@ second one to list their users. One FTP Server has neither:
   your own goes in as `--cert` and `--key`.
 - **No user database.** The single user is `--id` and `--password`. Give an
   `--id` without a password and one is generated for that run and printed.
-- **No leftovers.** The server writes nothing but the files clients upload.
+- **No leftovers.** Beside the log of what clients did, which `--log=off` turns
+  off, the server writes nothing but the files clients upload.
 
 Once it is listening, it prints the settings it ended up with and the client
 commands that match them, credentials already filled in:
@@ -42,6 +43,7 @@ commands that match them, credentials already filled in:
 	- password : 1234
 	- home : /srv/files
 	- timeout : [none]
+	- log : /home/benelog/one-ftpserver-2026-08-16.log
 
 	# Client commands
 	- upload : curl -T [filename] ftp://192.168.0.10:10021/ -u benelog:1234
@@ -93,6 +95,8 @@ unsigned download would be:
 | `--timeout` | `0` | Stop by itself after this long, such as `30m`. `0` keeps it running. |
 | `--publicHost` | | Address to show clients. Detected when unset. |
 | `--json` | `false` | Print the settings as JSON instead of text. |
+| `--log` | `one-ftpserver.log` | File to log the activity to, one per day. `off` keeps none. |
+| `--console` | `false` | Log the activity to the console as well. |
 
 ### FTPS
 
@@ -137,6 +141,36 @@ Three things to know when serving a certificate of your own:
 A certificate from any other authority works the same, as long as it comes as
 PEM: the certificate with its chain in one file, the private key in another.
 
+### Watching what clients do
+
+Every login, transfer, listing, deletion and rename is logged. The log goes to
+a file next to the server, named after the day it covers:
+
+	one-ftpserver-2026-08-16.log
+
+A new file is opened when the date changes, so a server left running leaves one
+file per day. Nothing is renamed and nothing is deleted; old days stay where
+they are until you remove them. `--log` moves the file elsewhere, and `off`
+turns it off:
+
+	one-ftpserver --log=/var/log/ftp.log
+	one-ftpserver --log=off
+
+`--console` writes the same lines to the terminal as they happen, which is what
+a server started to watch a transfer is for:
+
+	one-ftpserver --console
+
+	time=2026-08-16T10:27:25 level=INFO msg=login client=1 from=192.168.0.20:51000 id=benelog
+	time=2026-08-16T10:27:25 level=INFO msg=download client=1 from=192.168.0.20:51000 id=benelog path=/report.pdf
+	time=2026-08-16T10:27:26 level=INFO msg="download done" client=1 from=192.168.0.20:51000 id=benelog path=/report.pdf bytes=182004
+
+The two are independent: `--console` alone adds the terminal to the file, and
+`--console --log=off` writes to the terminal only. The console lines go to the
+standard error stream, so the summary, and the object `--json` prints, stay on
+the standard output stream for a script to read. Passwords are never logged,
+not even the ones a refused login sent.
+
 ### Stopping by itself
 
 A server started to move one file rarely needs to outlive it. `--timeout` sets
@@ -175,6 +209,7 @@ parsing text:
 	  "anonymous": false,
 	  "home": "/srv/files",
 	  "ssl": false,
+	  "log": "/home/benelog/one-ftpserver-2026-08-16.log",
 	  "upload": "curl -T [filename] ftp://192.168.0.10:2121/ -u benelog:UEPH6KBIXDUIVEKC2Q23U3L4QI",
 	  "download": "curl -O ftp://192.168.0.10:2121/[filename] -u benelog:UEPH6KBIXDUIVEKC2Q23U3L4QI",
 	  "get": "wget --user=benelog --password=UEPH6KBIXDUIVEKC2Q23U3L4QI ftp://192.168.0.10:2121/[filename]",

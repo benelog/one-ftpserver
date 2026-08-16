@@ -1,5 +1,22 @@
 # Changelog
 
+## Unreleased
+
+- The server logs what its clients do again: connections, logins, transfers
+  with their size, listings, deletions and renames. Passwords are never
+  written, not even the ones a refused login sent.
+- `--log` is the file it goes to, `one-ftpserver.log` by default. The date of
+  the day is added to the name, as in `one-ftpserver-2026-08-16.log`, and a new
+  file is opened when the date changes. Nothing is renamed and no old file is
+  removed. `--log=off` keeps no file at all, and a path that cannot be written
+  is refused at startup.
+- `--console` writes the same lines to the terminal as they happen, which
+  answers [#3](https://github.com/benelog/one-ftpserver/issues/3). It works
+  alongside the file or on its own, and it writes to the standard error stream,
+  so the summary and the `--json` object stay on the standard output stream for
+  a script to read.
+- The summary, and the `--json` object, name the log file of the day.
+
 ## v2.1.0
 
 - `--cert` and `--key` serve FTPS with a certificate of your own, such as one

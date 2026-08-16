@@ -4,6 +4,7 @@ import (
 	"crypto/subtle"
 	"crypto/tls"
 	"errors"
+	"log/slog"
 	"strconv"
 
 	ftpserver "github.com/fclairamb/ftpserverlib"
@@ -19,11 +20,12 @@ type driver struct {
 	config    *Config
 	settings  *ftpserver.Settings
 	tlsConfig *tls.Config
+	logger    *slog.Logger
 }
 
 // newDriver builds the driver, and with it the TLS certificate when the server
 // is asked to run over TLS.
-func newDriver(config *Config) (*driver, error) {
+func newDriver(config *Config, logger *slog.Logger) (*driver, error) {
 	passivePorts, err := parsePassivePorts(config.PassivePorts)
 	if err != nil {
 		return nil, err
@@ -36,7 +38,7 @@ func newDriver(config *Config) (*driver, error) {
 		Banner:                   "one-ftpserver",
 	}
 
-	drv := &driver{config: config, settings: settings}
+	drv := &driver{config: config, settings: settings, logger: logger}
 
 	if config.SSL {
 		// Implicit TLS keeps the ftps:// URL of the usage output working as
@@ -63,26 +65,45 @@ func (d *driver) GetSettings() (*ftpserver.Settings, error) {
 }
 
 // ClientConnected returns the message a client sees before it logs in.
-func (d *driver) ClientConnected(_ ftpserver.ClientContext) (string, error) {
+func (d *driver) ClientConnected(cc ftpserver.ClientContext) (string, error) {
+	d.clientLogger(cc).Info("client connected")
+
 	return "one-ftpserver", nil
 }
 
 // ClientDisconnected has nothing to clean up: no state is kept per client.
-func (d *driver) ClientDisconnected(_ ftpserver.ClientContext) {}
+func (d *driver) ClientDisconnected(cc ftpserver.ClientContext) {
+	d.clientLogger(cc).Info("client disconnected")
+}
 
 // AuthUser checks the credentials and hands back a file system rooted at the
 // home directory, so a client cannot reach anything above it.
-func (d *driver) AuthUser(_ ftpserver.ClientContext, user, pass string) (ftpserver.ClientDriver, error) {
+func (d *driver) AuthUser(cc ftpserver.ClientContext, user, pass string) (ftpserver.ClientDriver, error) {
+	logger := d.clientLogger(cc).With("id", user)
+
 	if !d.authenticate(user, pass) {
+		// The password is never logged, not even a rejected one: a mistyped
+		// password is usually a real one with a character out of place.
+		logger.Warn("login refused")
+
 		return nil, errAuthFailed
 	}
+
+	logger.Info("login")
 
 	// BasePathFs names files by their full path on disk in its errors, and
 	// those errors are repeated to the client, so they go through a wrapper
 	// that puts the path the client used back in.
 	fs := afero.NewBasePathFs(afero.NewOsFs(), d.config.Home)
+	hiding := &pathHidingFs{Fs: fs, home: d.config.Home}
 
-	return &pathHidingFs{Fs: fs, home: d.config.Home}, nil
+	return &loggingFs{Fs: hiding, logger: logger}, nil
+}
+
+// clientLogger tags every line of a client with who it is, which is what makes
+// the log readable when several clients are connected at once.
+func (d *driver) clientLogger(cc ftpserver.ClientContext) *slog.Logger {
+	return d.logger.With("client", cc.ID(), "from", cc.RemoteAddr().String())
 }
 
 // authenticate reports whether these credentials are the ones the server was

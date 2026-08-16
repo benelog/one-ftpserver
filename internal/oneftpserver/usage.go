@@ -24,6 +24,7 @@ type Summary struct {
 	SSL          bool     `json:"ssl"`
 	Cert         string   `json:"cert,omitempty"`
 	Timeout      string   `json:"timeout,omitempty"`
+	Log          string   `json:"log,omitempty"`
 	Upload       string   `json:"upload"`
 	Download     string   `json:"download"`
 	Get          string   `json:"get,omitempty"`
@@ -45,6 +46,7 @@ func newSummary(config *Config, host string, port int) *Summary {
 		PassivePorts: config.PassivePorts,
 		SSL:          config.SSL,
 		Cert:         config.Cert,
+		Log:          config.LogFile(),
 	}
 
 	if config.Timeout > 0 {
@@ -107,6 +109,7 @@ func (s *Summary) Print(out io.Writer) error {
 	writer.printf("- password : %s\n", orNone(s.Password))
 	writer.printf("- home : %s\n", s.Home)
 	writer.printf("- timeout : %s\n", orNone(s.Timeout))
+	writer.printf("- log : %s\n", orNone(s.Log))
 
 	for _, warning := range s.Warnings {
 		writer.printf("\n! %s\n", warning)

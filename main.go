@@ -24,6 +24,9 @@ func main() {
 	flag.DurationVar(&config.Timeout, "timeout", 0, "stop by itself after this long, such as 30m, 0 to keep running")
 	flag.StringVar(&config.PublicHost, "publicHost", "", "address to show clients, useful behind NAT, detected by default")
 	flag.BoolVar(&config.JSON, "json", false, "print the settings as JSON instead of text")
+	flag.StringVar(&config.Log, "log", oneftpserver.DefaultLogFile,
+		"file to log the activity to, one per day, "+oneftpserver.LogOff+" to keep no log file")
+	flag.BoolVar(&config.Console, "console", false, "log the activity to the console as well")
 
 	flag.Usage = usage
 	flag.Parse()
@@ -53,6 +56,7 @@ Examples:
   one-ftpserver --port=10021 --id=benelog --password=1234
   one-ftpserver --port=10021 --passivePorts=10125-10199 --ssl --home=/srv/files --timeout=30m
   one-ftpserver --cert=fullchain.pem --key=privkey.pem
+  one-ftpserver --console --log=off
 `
 )
 

@@ -3,6 +3,7 @@ package oneftpserver
 import (
 	"bytes"
 	"encoding/json"
+	"path/filepath"
 	"strings"
 	"testing"
 	"time"
@@ -100,6 +101,7 @@ func TestPrintedSummaryHoldsEverySetting(t *testing.T) {
 	config := prepared(t, &Config{
 		ID: "benelog", Password: "1234", Home: t.TempDir(),
 		PassivePorts: "10125-10199", Timeout: 30 * time.Minute,
+		Log: filepath.Join(t.TempDir(), "one-ftpserver.log"),
 	})
 
 	var out bytes.Buffer
@@ -108,7 +110,7 @@ func TestPrintedSummaryHoldsEverySetting(t *testing.T) {
 	}
 
 	printed := out.String()
-	for _, want := range []string{"10021", "benelog", "1234", "10125-10199", "30m0s", config.Home} {
+	for _, want := range []string{"10021", "benelog", "1234", "10125-10199", "30m0s", config.Home, config.LogFile()} {
 		if !strings.Contains(printed, want) {
 			t.Errorf("printed summary is missing %q:\n%s", want, printed)
 		}

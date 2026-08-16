@@ -112,7 +112,14 @@ func startServer(t *testing.T, config *Config) *Summary {
 	config.Port = 0
 	prepared(t, config)
 
-	server, err := New(config)
+	logger, logFile, err := newLogger(config)
+	if err != nil {
+		t.Fatalf("newLogger failed: %v", err)
+	}
+
+	t.Cleanup(func() { _ = logFile.Close() })
+
+	server, err := New(config, logger)
 	if err != nil {
 		t.Fatalf("New failed: %v", err)
 	}
