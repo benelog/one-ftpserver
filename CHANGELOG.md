@@ -1,6 +1,6 @@
 # Changelog
 
-## Unreleased
+## v2.2.0
 
 - The server logs what its clients do again: connections, logins, transfers
   with their size, listings, deletions and renames. Passwords are never

@@ -68,7 +68,7 @@ what makes the commands below work as they are written.
 
 Available assets: `one-ftpserver-linux-amd64`, `one-ftpserver-linux-arm64`,
 `one-ftpserver-windows-amd64.exe`, `one-ftpserver-windows-arm64.exe`. To pin a
-version, replace `latest/download` with `download/v2.1.0`.
+version, replace `latest/download` with `download/v2.2.0`.
 
 On macOS, build the binary yourself — Go is the only requirement, and a binary
 built on the machine is one Gatekeeper has no reason to block, which an
