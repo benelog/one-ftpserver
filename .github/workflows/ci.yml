@@ -16,5 +16,5 @@ jobs:
       # v2 of golangci-lint, matching .golangci.yml, needs action v7 or later.
       - uses: golangci/golangci-lint-action@v9
         with:
-          version: v2.12
+          version: v2.13
       - run: go test ./...
