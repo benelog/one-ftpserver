@@ -115,8 +115,9 @@ func (d *driver) authenticate(user, pass string) bool {
 		return user == AnonymousID || user == "ftp"
 	}
 
-	// Constant time, so a wrong password cannot be found one character at a
-	// time by measuring how long the answer takes.
+	// Constant time by contract. Go's == makes no such promise: it happens to
+	// compare 8 bytes at a time, so a short password gives an attacker nothing
+	// to time today, but that is an implementation detail and not a guarantee.
 	sameUser := subtle.ConstantTimeCompare([]byte(user), []byte(d.config.ID)) == 1
 	samePassword := subtle.ConstantTimeCompare([]byte(pass), []byte(d.config.Password)) == 1
 
